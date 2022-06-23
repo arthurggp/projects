@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
                 public void onClick(DialogInterface dialogInterface, int i) {
                     dialogInterface.dismiss();
                 }
-            });
+            }).show();
         }
     });
 
