@@ -6,11 +6,63 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Scan"
-        android:layout_centerInParent="true"
-        android:id="@+id/btn_scan"/>
+    <LinearLayout
+        android:id="@+id/line1"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!--BOTÃO ESCAN QR CODE-->
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Scan"
+            android:layout_centerInParent="true"
+            android:id="@+id/btn_scan"/>
+
+        <!--BOTÃO ADICIONA CONVIDADO-->
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="ADD"
+            android:layout_centerInParent="true"
+            android:id="@+id/btn_add"/>
+        <View
+            android:background="#fff"
+            android:layout_width="2dp"
+            android:layout_height="match_parent"/>
+
+        <!--BOTÃO BUSCA POR ID-->
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="BUSCA POR ID"
+            android:layout_centerInParent="true"
+            android:id="@+id/btn_getbyid"/>
+        <View
+            android:background="#fff"
+            android:layout_width="2dp"
+            android:layout_height="match_parent"/>
+
+        <!--BOTÃO BUSCA TODOS-->
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="BUSCA TODOS"
+            android:layout_centerInParent="true"
+            android:id="@+id/btn_getall"/>
+        <View
+            android:background="#fff"
+            android:layout_width="2dp"
+            android:layout_height="match_parent"/>
+    </LinearLayout>
+
+    <TextView
+        android:layout_below="@+id/line1"
+        android:gravity="center"
+        android:text="TODOS OS CONVIDADOS"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
 
 </RelativeLayout>
