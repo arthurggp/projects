@@ -26,7 +26,7 @@
             android:layout_height="wrap_content"
             android:text="ADD"
             android:layout_centerInParent="true"
-            android:id="@+id/btn_add"/>
+            android:id="@+id/insert_data"/>
         <View
             android:background="#fff"
             android:layout_width="2dp"

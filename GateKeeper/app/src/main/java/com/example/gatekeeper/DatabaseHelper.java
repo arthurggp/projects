@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 
 import com.example.gatekeeper.models.ConvidadoModel;
 
@@ -50,6 +51,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues contentValues=new ContentValues();
+        contentValues.put(ID, convidado.getId());
         contentValues.put(CPF, convidado.getCpf());
         contentValues.put(RG, convidado.getRg());
         contentValues.put(NOME, convidado.getNome());

@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
         databaseHelper = new DatabaseHelper(MainActivity.this);
 
         // TA COM PAU AQUI-----RETORNANDO NULL
-        final Button insert = findViewById(R.id.btn_insert);
+        final Button insert = findViewById(R.id.insert_data);
         //-----
 
         final TextView dataList = findViewById(R.id.btn_getall);
@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
     });
 
     // TELA DO INSERT
-    private void ShowInputDialog() {
+    public void ShowInputDialog() {
         AlertDialog.Builder al = new AlertDialog.Builder(MainActivity.this);
         View view = getLayoutInflater().inflate(R.layout.insert_dialog, null);
         final EditText nome = view.findViewById(R.id.nome);
