@@ -15,6 +15,8 @@ public class ConvidadoModel {
         this.status = status;
     }
 
+    public ConvidadoModel(){
+    }
     public String getId() {
         return id;
     }

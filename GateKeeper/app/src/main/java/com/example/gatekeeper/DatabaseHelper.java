@@ -31,6 +31,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+        //CRIA TABELA
         String query = "CREATE TABLE if not EXISTS " +NOME_TABELA+
                 "("+
                 ID+ " INTEGER PRIMARY KEY, "+
@@ -47,6 +48,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS "+NOME_TABELA);
     }
 
+    //INSERE CONVIDADO
     public void AddConvidado(ConvidadoModel convidado){
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -61,7 +63,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
     }
 
-    //GET CONVIDADO BY ID
+    //BUSCA CONVIDADO BY ID
     public ConvidadoModel getConvidado(int id){
         SQLiteDatabase db=this.getReadableDatabase();
         Cursor cursor = db.query(
@@ -81,7 +83,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return convidadoModel;
     }
 
-    //GET LISTA DE CONVIDADOS
+    //BUSCA LISTA DE CONVIDADOS
     public List<ConvidadoModel> getAllConvidados(){
         List<ConvidadoModel> convidadoModelList = new ArrayList<>();
         String query = "SELECT * from "+NOME_TABELA;
@@ -96,6 +98,33 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
         db.close();
         return convidadoModelList;
+    }
+
+    //ATUALIZA CONVIDADO
+    public int updateConvidado(ConvidadoModel convidadoModel){
+        SQLiteDatabase db=this.getWritableDatabase();
+        ContentValues contentValues=new ContentValues();
+        contentValues.put(NOME,convidadoModel.getNome());
+        contentValues.put(CPF,convidadoModel.getCpf());
+        contentValues.put(RG,convidadoModel.getRg());
+        contentValues.put(STATUS,convidadoModel.getStatus());
+        return db.update(NOME_TABELA,contentValues,ID+"=?",new String[]{String.valueOf(convidadoModel.getId())});
+
+    }
+
+    //DELETA CONVIDADO
+    public void deleteConvidado(String id){
+        SQLiteDatabase db=this.getWritableDatabase();
+        db.delete(NOME_TABELA,ID+"=?",new String[]{id});
+        db.close();
+    }
+
+    //CONTAGEM DE CONVIDADOS
+    public int getTotalCount(){
+        String query="SELECT * from "+NOME_TABELA;
+        SQLiteDatabase sqLiteDatabase=this.getReadableDatabase();
+        Cursor cursor=sqLiteDatabase.rawQuery(query,null);
+        return cursor.getCount();
     }
 
 

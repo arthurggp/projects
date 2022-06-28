@@ -16,31 +16,37 @@ import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
 
 import org.w3c.dom.Text;
-
-import java.util.Date;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button btn_scan;
-    Button insert;
     DatabaseHelper databaseHelper;
     TextView datalist;
+    TextView datalist_count;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        btn_scan = findViewById(R.id.btn_scan);
+        Button btn_scan = findViewById(R.id.btn_scan);
         btn_scan.setOnClickListener(v-> scanCode());
 
-        databaseHelper = new DatabaseHelper(MainActivity.this);
+        databaseHelper=new DatabaseHelper(MainActivity.this);
+        Button delete=findViewById(R.id.delete_btn);
+        Button insert=findViewById(R.id.insert_data);
+        Button update=findViewById(R.id.update_data);
+        Button read=findViewById(R.id.refresh_data);
+        datalist=findViewById(R.id.all_data_list);
+        datalist_count=findViewById(R.id.data_list_count);
 
-        // TA COM PAU AQUI-----RETORNANDO NULL
-        final Button insert = findViewById(R.id.insert_data);
-        //-----
+        read.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                refreshData();
 
-        final TextView dataList = findViewById(R.id.btn_getall);
+            }
+        });
 
         insert.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -49,9 +55,34 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        update.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showUpdateIdDialog();
+            }
+        });
+
+        /*delete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showDeleteDialog();
+            }
+        });*/
+
     }
 
-    //METODO SCAN DO QRCODE
+    //REFRESH
+    private void refreshData() {
+
+        List<ConvidadoModel> convidadoModelList=databaseHelper.getAllConvidados();
+        datalist.setText("");
+        for(ConvidadoModel convidadoModel:convidadoModelList){
+            datalist.append("ID : "+convidadoModel.getId()+" | Name : "+convidadoModel.getNome()+" | Email : "+convidadoModel.getCpf()+" | DOB : "+convidadoModel.getRg()+ " | PHONE : "+convidadoModel.getStatus()+" \n\n");
+        }
+    }
+
+
+    //--------------------------------------- METODO SCAN DO QRCODE -----------------------------------------------
     private void scanCode() {
         ScanOptions options = new ScanOptions();
         options.setBeepEnabled(true);
@@ -73,35 +104,104 @@ public class MainActivity extends AppCompatActivity {
             }).show();
         }
     });
+    //----------------------------------------------------------------------------------------------------------------
 
-    // TELA DO INSERT
-    public void ShowInputDialog() {
-        AlertDialog.Builder al = new AlertDialog.Builder(MainActivity.this);
-        View view = getLayoutInflater().inflate(R.layout.insert_dialog, null);
-        final EditText nome = view.findViewById(R.id.nome);
-        final EditText cpf = view.findViewById(R.id.cpf);
-        final EditText id = view.findViewById(R.id.id);
-        final EditText rg = view.findViewById(R.id.rg);
-        final EditText status = view.findViewById(R.id.status);
-        Button insertBtn = view.findViewById(R.id.btn_insert);
+    private void showDeleteDialog() {
+        AlertDialog.Builder al=new AlertDialog.Builder(MainActivity.this);
+        View view=getLayoutInflater().inflate(R.layout.delete_dialog,null);
         al.setView(view);
+        final EditText id_input=view.findViewById(R.id.id_input);
+        Button delete_btn=view.findViewById(R.id.delete_btn);
+        final AlertDialog alertDialog=al.show();
 
-        final AlertDialog alertDialog = al.show();
-
-        insertBtn.setOnClickListener(new View.OnClickListener() {
+        delete_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ConvidadoModel convidadoModel = new ConvidadoModel("", "", "", "", "");
-                convidadoModel.setNome(nome.getText().toString());
-                convidadoModel.setCpf(cpf.getText().toString());
-                convidadoModel.setId(id.getText().toString());
-                convidadoModel.setStatus(status.getText().toString());
-                convidadoModel.setId(id.getText().toString());
-
-                databaseHelper.AddConvidado(convidadoModel);
+                databaseHelper.deleteConvidado(id_input.getText().toString());
                 alertDialog.dismiss();
+                refreshData();
+
+            }
+        });
+
+
+    }
+
+    private void showUpdateIdDialog() {
+        AlertDialog.Builder al=new AlertDialog.Builder(MainActivity.this);
+        View view=getLayoutInflater().inflate(R.layout.update_id_dialog,null);
+        al.setView(view);
+        final EditText id_input=view.findViewById(R.id.id_input);
+        Button fetch_btn=view.findViewById(R.id.update_id_btn);
+        final AlertDialog alertDialog=al.show();
+        fetch_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showDataDialog(id_input.getText().toString());
+                alertDialog.dismiss();
+                refreshData();
+            }
+        });
+
+    }
+
+    private void showDataDialog(final String id) {
+        ConvidadoModel convidadoModel=databaseHelper.getConvidado(Integer.parseInt(id));
+        AlertDialog.Builder al=new AlertDialog.Builder(MainActivity.this);
+        View view=getLayoutInflater().inflate(R.layout.update_dialog,null);
+        final EditText nome=view.findViewById(R.id.nome);
+        final EditText rg=view.findViewById(R.id.rg);
+        final EditText cpf=view.findViewById(R.id.cpf);
+        final EditText status=view.findViewById(R.id.status);
+        Button update_btn=view.findViewById(R.id.update_btn);
+        al.setView(view);
+
+        nome.setText(convidadoModel.getNome());
+        rg.setText(convidadoModel.getRg());
+        cpf.setText(convidadoModel.getCpf());
+        status.setText(convidadoModel.getStatus());
+
+        final AlertDialog alertDialog=al.show();
+        update_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ConvidadoModel convidadoModel=new ConvidadoModel();
+                convidadoModel.setNome(nome.getText().toString());
+                convidadoModel.setId(id);
+                convidadoModel.setRg(rg.getText().toString());
+                convidadoModel.setCpf(cpf.getText().toString());
+                convidadoModel.setStatus(status.getText().toString());
+                databaseHelper.updateConvidado(convidadoModel);
+                alertDialog.dismiss();
+                refreshData();
             }
         });
     }
 
+    private void ShowInputDialog() {
+        AlertDialog.Builder al=new AlertDialog.Builder(MainActivity.this);
+        View view=getLayoutInflater().inflate(R.layout.insert_dialog,null);
+        final EditText nome=view.findViewById(R.id.nome);
+        final EditText rg=view.findViewById(R.id.rg);
+        final EditText cpf=view.findViewById(R.id.cpf);
+        final EditText status=view.findViewById(R.id.status);
+        Button insertBtn=view.findViewById(R.id.insert_btn);
+        al.setView(view);
+
+        final AlertDialog alertDialog=al.show();
+
+        insertBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ConvidadoModel convidadoModel=new ConvidadoModel();
+                convidadoModel.setNome(nome.getText().toString());
+                convidadoModel.setRg(rg.getText().toString());
+                convidadoModel.setCpf(cpf.getText().toString());
+                convidadoModel.setStatus(status.getText().toString());
+                databaseHelper.AddConvidado(convidadoModel);
+                alertDialog.dismiss();
+                refreshData();
+            }
+        });
+    }
 }
