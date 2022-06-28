@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    //--------------------------------------- METODO SCAN DO QRCODE -----------------------------------------------
+    //--------------------------------------- MÉTODO SCAN DO QRCODE -----------------------------------------------
     private void scanCode() {
         ScanOptions options = new ScanOptions();
         options.setBeepEnabled(true);
@@ -95,7 +95,9 @@ public class MainActivity extends AppCompatActivity {
         if(result.getContents() != null){
             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
             builder.setTitle("Result");
-            builder.setMessage(result.getContents());
+            //builder.setMessage(result.getContents());
+            ConvidadoModel convidadoModel = searchByScannedQrCode(result.getContents().toString());
+            builder.setMessage(convidadoModel.getNome() + " - " + convidadoModel.getCpf() + " - " + convidadoModel.getRg() + " - " + convidadoModel.getStatus());
             builder.setPositiveButton("ok", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
@@ -105,6 +107,13 @@ public class MainActivity extends AppCompatActivity {
         }
     });
     //----------------------------------------------------------------------------------------------------------------
+
+    //BUSCA NA BASE PELO CODIGO DO QRCODE
+    private ConvidadoModel searchByScannedQrCode(String code){
+        ConvidadoModel convidadoModel = new ConvidadoModel();
+        convidadoModel = databaseHelper.getConvidado(Integer.parseInt(code));
+        return convidadoModel;
+    }
 
     private void showDeleteDialog() {
         AlertDialog.Builder al=new AlertDialog.Builder(MainActivity.this);
@@ -123,8 +132,6 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-
-
     }
 
     private void showUpdateIdDialog() {
@@ -149,6 +156,7 @@ public class MainActivity extends AppCompatActivity {
         ConvidadoModel convidadoModel=databaseHelper.getConvidado(Integer.parseInt(id));
         AlertDialog.Builder al=new AlertDialog.Builder(MainActivity.this);
         View view=getLayoutInflater().inflate(R.layout.update_dialog,null);
+        //final EditText id=view.findViewById(R.id.id);
         final EditText nome=view.findViewById(R.id.nome);
         final EditText rg=view.findViewById(R.id.rg);
         final EditText cpf=view.findViewById(R.id.cpf);
@@ -167,7 +175,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 ConvidadoModel convidadoModel=new ConvidadoModel();
                 convidadoModel.setNome(nome.getText().toString());
-                convidadoModel.setId(id);
+                convidadoModel.setId(id.toString());
                 convidadoModel.setRg(rg.getText().toString());
                 convidadoModel.setCpf(cpf.getText().toString());
                 convidadoModel.setStatus(status.getText().toString());
@@ -181,6 +189,7 @@ public class MainActivity extends AppCompatActivity {
     private void ShowInputDialog() {
         AlertDialog.Builder al=new AlertDialog.Builder(MainActivity.this);
         View view=getLayoutInflater().inflate(R.layout.insert_dialog,null);
+        final EditText id=view.findViewById(R.id.id);
         final EditText nome=view.findViewById(R.id.nome);
         final EditText rg=view.findViewById(R.id.rg);
         final EditText cpf=view.findViewById(R.id.cpf);
@@ -194,6 +203,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 ConvidadoModel convidadoModel=new ConvidadoModel();
+                convidadoModel.setId(id.getText().toString());
                 convidadoModel.setNome(nome.getText().toString());
                 convidadoModel.setRg(rg.getText().toString());
                 convidadoModel.setCpf(cpf.getText().toString());
