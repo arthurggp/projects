@@ -15,7 +15,12 @@ import com.example.gatekeeper.models.ConvidadoModel;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
 
-import org.w3c.dom.Text;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -23,9 +28,13 @@ public class MainActivity extends AppCompatActivity {
     DatabaseHelper databaseHelper;
     TextView datalist;
     TextView datalist_count;
+    String FILE_NAME = "convidados.json";
+    String CHARSET = "UTF-8";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        ParseJSON();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -33,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
         btn_scan.setOnClickListener(v-> scanCode());
 
         databaseHelper=new DatabaseHelper(MainActivity.this);
-        Button delete=findViewById(R.id.delete_btn);
+        Button delete=findViewById(R.id.delete_data);
         Button insert=findViewById(R.id.insert_data);
         Button update=findViewById(R.id.update_data);
         Button read=findViewById(R.id.refresh_data);
@@ -43,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
         read.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                refreshData();
+                //refreshData();
 
             }
         });
@@ -62,13 +71,72 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        /*delete.setOnClickListener(new View.OnClickListener() {
+        delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showDeleteDialog();
+                searchByRg();
             }
-        });*/
+        });
 
+    }
+
+    //TRANSFORMA JSON STRING EM OBJETO
+    public void ParseJSON(){
+
+        try {
+            JSONObject jsonObject = new JSONObject(JsonDataFromAssets());
+            JSONArray jsonArray= jsonObject.getJSONArray("Convidados");
+
+            for(int i=0;i<jsonArray.length();i++) {
+                JSONObject data = jsonArray.getJSONObject(i);
+                ConvidadoModel convidadoModel = new ConvidadoModel();
+                convidadoModel.setCodigo(data.getString("CODIGO"));
+                convidadoModel.setConvidado_de(data.getString("CONVIDADO_DE"));
+                convidadoModel.setNome(data.getString("NOME"));
+                convidadoModel.setRg(data.getString("RG"));
+                convidadoModel.setCpf(data.getString("CPF"));
+                convidadoModel.setStatus(data.getString("STATUS"));
+
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    //RETORNA JSON DO ARQUIVO
+    private String JsonDataFromAssets(){
+        String json = null;
+        int sizeofFile = 0;
+        byte [] bufferDAta;
+
+        InputStream inputStream = null;
+
+        try {
+            inputStream = getAssets().open(FILE_NAME);
+            sizeofFile = inputStream.available();
+            bufferDAta = new byte[sizeofFile];
+            inputStream.read(bufferDAta);
+            inputStream.close();
+            json = new String(bufferDAta, CHARSET);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        return json;
+    }
+
+    //POPULA TABELA
+    private void fillDataBase(ConvidadoModel convidadoModel){
+
+    }
+
+    //MOSTRA RESULTADO DA BUSCA
+    private void showSearchResults(ConvidadoModel convidadoModel) {
+        datalist.setText("");
+            datalist.append("CODIGO : "+convidadoModel.getCodigo()+" | NOME : "+convidadoModel.getNome()+" | CPF : "+convidadoModel.getCpf()+" | CONVIDADO_DE : "+convidadoModel.getConvidado_de()+" | RG : "+convidadoModel.getRg()+ " | STATUS : "+convidadoModel.getStatus()+" \n\n");
     }
 
     //REFRESH
@@ -77,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
         List<ConvidadoModel> convidadoModelList=databaseHelper.getAllConvidados();
         datalist.setText("");
         for(ConvidadoModel convidadoModel:convidadoModelList){
-            datalist.append("ID : "+convidadoModel.getId()+" | Name : "+convidadoModel.getNome()+" | Email : "+convidadoModel.getCpf()+" | DOB : "+convidadoModel.getRg()+ " | PHONE : "+convidadoModel.getStatus()+" \n\n");
+            datalist.append("CODIGO : "+convidadoModel.getCodigo()+" | NOME : "+convidadoModel.getNome()+" | CPF : "+convidadoModel.getCpf()+" | CONVIDADO_DE : "+convidadoModel.getConvidado_de()+" | RG : "+convidadoModel.getRg()+ " | STATUS : "+convidadoModel.getStatus()+" \n\n");
         }
     }
 
@@ -115,9 +183,10 @@ public class MainActivity extends AppCompatActivity {
         return convidadoModel;
     }
 
-    private void showDeleteDialog() {
+    //BUSCA POR RG
+    private void searchByRg() {
         AlertDialog.Builder al=new AlertDialog.Builder(MainActivity.this);
-        View view=getLayoutInflater().inflate(R.layout.delete_dialog,null);
+        View view=getLayoutInflater().inflate(R.layout.search_by_rg_dialog,null);
         al.setView(view);
         final EditText id_input=view.findViewById(R.id.id_input);
         Button delete_btn=view.findViewById(R.id.delete_btn);
@@ -126,9 +195,9 @@ public class MainActivity extends AppCompatActivity {
         delete_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                databaseHelper.deleteConvidado(id_input.getText().toString());
+                showSearchResults(databaseHelper.getConvidadoByRg(id_input.getText().toString()));
                 alertDialog.dismiss();
-                refreshData();
+                //refreshData();
 
             }
         });
@@ -146,14 +215,14 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 showDataDialog(id_input.getText().toString());
                 alertDialog.dismiss();
-                refreshData();
+                //refreshData();
             }
         });
 
     }
 
-    private void showDataDialog(final String id) {
-        ConvidadoModel convidadoModel=databaseHelper.getConvidado(Integer.parseInt(id));
+    private void showDataDialog(final String codigo) {
+        ConvidadoModel convidadoModel=databaseHelper.getConvidado(Integer.parseInt(codigo));
         AlertDialog.Builder al=new AlertDialog.Builder(MainActivity.this);
         View view=getLayoutInflater().inflate(R.layout.update_dialog,null);
         //final EditText id=view.findViewById(R.id.id);
@@ -175,13 +244,13 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 ConvidadoModel convidadoModel=new ConvidadoModel();
                 convidadoModel.setNome(nome.getText().toString());
-                convidadoModel.setId(id.toString());
+                convidadoModel.setCodigo(codigo.toString());
                 convidadoModel.setRg(rg.getText().toString());
                 convidadoModel.setCpf(cpf.getText().toString());
                 convidadoModel.setStatus(status.getText().toString());
                 databaseHelper.updateConvidado(convidadoModel);
                 alertDialog.dismiss();
-                refreshData();
+                //refreshData();
             }
         });
     }
@@ -193,6 +262,7 @@ public class MainActivity extends AppCompatActivity {
         final EditText nome=view.findViewById(R.id.nome);
         final EditText rg=view.findViewById(R.id.rg);
         final EditText cpf=view.findViewById(R.id.cpf);
+        final EditText convidado_de=view.findViewById(R.id.convidado_de);
         final EditText status=view.findViewById(R.id.status);
         Button insertBtn=view.findViewById(R.id.insert_btn);
         al.setView(view);
@@ -203,14 +273,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 ConvidadoModel convidadoModel=new ConvidadoModel();
-                convidadoModel.setId(id.getText().toString());
+                convidadoModel.setCodigo(id.getText().toString());
                 convidadoModel.setNome(nome.getText().toString());
                 convidadoModel.setRg(rg.getText().toString());
                 convidadoModel.setCpf(cpf.getText().toString());
+                convidadoModel.setConvidado_de(convidado_de.getText().toString());
                 convidadoModel.setStatus(status.getText().toString());
                 databaseHelper.AddConvidado(convidadoModel);
                 alertDialog.dismiss();
-                refreshData();
+                //refreshData();
             }
         });
     }

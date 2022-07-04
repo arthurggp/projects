@@ -3,9 +3,12 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="..\:/Users/ARTHUR/AndroidStudioProjects/GateKeeper/app/src/main/res/layout/activity_main.xml" value="0.1" />
+        <entry key="..\:/Users/ARTHUR/AndroidStudioProjects/GateKeeper/app/src/main/res/layout/activity_main.xml" value="0.22" />
         <entry key="..\:/Users/ARTHUR/AndroidStudioProjects/GateKeeper/app/src/main/res/layout/delete_dialog.xml" value="0.3614583333333333" />
         <entry key="..\:/Users/ARTHUR/AndroidStudioProjects/GateKeeper/app/src/main/res/layout/insert_dialog.xml" value="0.29528985507246375" />
+        <entry key="..\:/Users/ARTHUR/AndroidStudioProjects/GateKeeper/app/src/main/res/layout/search_by_cpf_dialog.xml" value="0.32447916666666665" />
+        <entry key="..\:/Users/ARTHUR/AndroidStudioProjects/GateKeeper/app/src/main/res/layout/search_by_rg_dialog.xml" value="0.3234375" />
+        <entry key="..\:/Users/ARTHUR/AndroidStudioProjects/GateKeeper/app/src/main/res/layout/search_result.xml" value="0.16168478260869565" />
         <entry key="..\:/Users/ARTHUR/AndroidStudioProjects/GateKeeper/app/src/main/res/layout/update_dialog.xml" value="0.2965811965811966" />
         <entry key="..\:/Users/ARTHUR/AndroidStudioProjects/GateKeeper/app/src/main/res/layout/update_id_dialog.xml" value="0.3625" />
       </map>

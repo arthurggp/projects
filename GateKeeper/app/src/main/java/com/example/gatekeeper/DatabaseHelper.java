@@ -11,6 +11,9 @@ import androidx.appcompat.app.AlertDialog;
 
 import com.example.gatekeeper.models.ConvidadoModel;
 
+import org.json.JSONObject;
+
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +22,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION=1;
     private static final String NOME_BANCO = "gatekeeper.db";
     private static final String NOME_TABELA = "convidados";
-    private static final String ID = "id";
+    private static final String CONVIDADO_DE = "convidado_de";
+    private static final String CODIGO = "id";
     private static final String CPF = "cpf";
     private static final String RG = "rg";
     private static final String NOME = "nome";
@@ -31,14 +35,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+
         //CRIA TABELA
         String query = "CREATE TABLE if not EXISTS " +NOME_TABELA+
                 "("+
-                ID+ " INTEGER PRIMARY KEY, "+
+                CODIGO+ " INTEGER PRIMARY KEY, "+
+                NOME+" TEXT, "+
                 CPF+" INTEGER, "+
                 RG+ " TEXT, "+
-                NOME+" TEXT, "+
-                STATUS+" TEXT "+
+                STATUS+" TEXT, "+
+                CONVIDADO_DE+" TEXT "+
                 ")";
         db.execSQL(query);
     }
@@ -53,11 +59,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues contentValues=new ContentValues();
-        contentValues.put(ID, convidado.getId());
+        contentValues.put(CODIGO, convidado.getCodigo());
         contentValues.put(CPF, convidado.getCpf());
         contentValues.put(RG, convidado.getRg());
         contentValues.put(NOME, convidado.getNome());
         contentValues.put(STATUS, convidado.getStatus());
+        contentValues.put(CONVIDADO_DE, convidado.getConvidado_de());
 
         db.insert(NOME_TABELA, null,contentValues);
         db.close();
@@ -68,8 +75,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db=this.getReadableDatabase();
         Cursor cursor = db.query(
                 NOME_TABELA,
-                new String[]{ID,CPF,RG,NOME,STATUS},
-                ID+" = ?",
+                new String[]{CODIGO,CPF,RG,NOME,STATUS, CONVIDADO_DE},
+                CODIGO+" = ?",
                 new String[]{String.valueOf(id)},
                 null,
                 null,
@@ -77,7 +84,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if(cursor!=null){
             cursor.moveToFirst();
         }
-        ConvidadoModel convidadoModel = new ConvidadoModel(cursor.getString(0),cursor.getString(1),cursor.getString(2),cursor.getString(3), cursor.getString(4));
+                                                         //CODIGO               ,NOME                  ,CPF                   ,RG                   ,STATUS                 ,CONVIDADO DE
+        ConvidadoModel convidadoModel = new ConvidadoModel(cursor.getString(0),cursor.getString(1),cursor.getString(2),cursor.getString(3), cursor.getString(4),cursor.getString(5));
         db.close();
 
         return convidadoModel;
@@ -92,11 +100,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         if(cursor.moveToFirst()){
             do{
-                ConvidadoModel convidadoModel = new ConvidadoModel(cursor.getString(0),cursor.getString(1),cursor.getString(2),cursor.getString(3), cursor.getString(4));
+                                                                  //CODIGO               ,NOME                  ,CPF                   ,RG                   ,STATUS                 ,CONVIDADO DE
+                ConvidadoModel convidadoModel = new ConvidadoModel(cursor.getString(0),cursor.getString(1),cursor.getString(2),cursor.getString(3), cursor.getString(4),cursor.getString(5));
                 convidadoModelList.add(convidadoModel);
             }while (cursor.moveToNext());
         }
         db.close();
+
         return convidadoModelList;
     }
 
@@ -108,14 +118,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         contentValues.put(CPF,convidadoModel.getCpf());
         contentValues.put(RG,convidadoModel.getRg());
         contentValues.put(STATUS,convidadoModel.getStatus());
-        return db.update(NOME_TABELA,contentValues,ID+"=?",new String[]{String.valueOf(convidadoModel.getId())});
+        return db.update(NOME_TABELA,contentValues,CODIGO+"=?",new String[]{String.valueOf(convidadoModel.getCodigo())});
 
     }
 
     //DELETA CONVIDADO
     public void deleteConvidado(String id){
         SQLiteDatabase db=this.getWritableDatabase();
-        db.delete(NOME_TABELA,ID+"=?",new String[]{id});
+        db.delete(NOME_TABELA,CODIGO+"=?",new String[]{id});
         db.close();
     }
 
@@ -127,5 +137,79 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return cursor.getCount();
     }
 
+    //BUSCA POR CPF
+    public ConvidadoModel getConvidadoByCpf(String cpf){
+        SQLiteDatabase db=this.getReadableDatabase();
+        ConvidadoModel convidadoModel = new ConvidadoModel();
 
+        Cursor cursor = db.query(
+                NOME_TABELA,
+                new String[]{CODIGO,CPF,RG,NOME,STATUS, CONVIDADO_DE},
+                CPF+" = ?",
+                new String[]{String.valueOf(cpf)},
+                null,
+                null,
+                null);
+        if(cursor!=null){
+            cursor.moveToFirst();
+        }
+
+        if(cursor.getCount() > 0){
+            convidadoModel = new ConvidadoModel(cursor.getString(0),cursor.getString(1),cursor.getString(2),cursor.getString(3), cursor.getString(4),cursor.getString(5));
+        }
+
+        db.close();
+
+        return convidadoModel;
+    }
+
+    //BUSCA POR RG
+    public ConvidadoModel getConvidadoByRg(String rg){
+        SQLiteDatabase db=this.getReadableDatabase();
+        ConvidadoModel convidadoModel = new ConvidadoModel();
+        Cursor cursor = db.query(
+                NOME_TABELA,
+                new String[]{CODIGO,CPF,RG,NOME,STATUS, CONVIDADO_DE},
+                RG+" = ?",
+                new String[]{String.valueOf(rg)},
+                null,
+                null,
+                null);
+        if(cursor!=null){
+            cursor.moveToFirst();
+        }
+
+        if(cursor.getCount() > 0){
+            convidadoModel = new ConvidadoModel(cursor.getString(0),cursor.getString(1),cursor.getString(2),cursor.getString(3), cursor.getString(4),cursor.getString(5));
+        }
+
+        db.close();
+
+        return convidadoModel;
+    }
+
+    //BUSCA POR NOME
+    public ConvidadoModel getConvidadoByNome(String nome){
+        SQLiteDatabase db=this.getReadableDatabase();
+        ConvidadoModel convidadoModel = new ConvidadoModel();
+
+        Cursor cursor = db.query(
+                NOME_TABELA,
+                new String[]{CODIGO,CPF,RG,NOME,STATUS, CONVIDADO_DE},
+                NOME+" = ?",
+                new String[]{String.valueOf(nome)},
+                null,
+                null,
+                null);
+        if(cursor!=null){
+            cursor.moveToFirst();
+        }
+
+        if(cursor.getCount() > 0){
+            convidadoModel = new ConvidadoModel(cursor.getString(0),cursor.getString(1),cursor.getString(2),cursor.getString(3), cursor.getString(4),cursor.getString(5));
+        }
+        db.close();
+
+        return convidadoModel;
+    }
 }

@@ -20,11 +20,11 @@
             android:gravity="center"
             />
 
-        <!--CAMPO ID-->
+        <!--CAMPO CODIGO-->
         <EditText
             android:layout_margin="5dp"
             android:id="@+id/id"
-            android:hint="ID"
+            android:hint="CODIGO"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
@@ -51,6 +51,14 @@
             android:hint="NOME"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
+
+        <!--CAMPO RG-->
+        <EditText
+            android:layout_margin="5dp"
+            android:id="@+id/convidado_de"
+            android:hint="CONVIDADO DE"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
 
         <!--CAMPO STATUS-->
         <EditText

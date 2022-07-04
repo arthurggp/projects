@@ -35,7 +35,7 @@
             android:layout_height="match_parent"/>
         <Button
             android:id="@+id/delete_data"
-            android:text="DELETE"
+            android:text="BUSCAR"
             android:textColor="#FFF"
             android:layout_weight="1"
             android:layout_width="match_parent"
