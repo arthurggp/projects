@@ -12,6 +12,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.example.gatekeeper.models.ConvidadoModel;
+import com.example.gatekeeper.models.ValidationStructure;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
 
@@ -30,6 +31,8 @@ public class MainActivity extends AppCompatActivity {
     TextView datalist_count;
     String FILE_NAME = "convidados.json";
     String CHARSET = "UTF-8";
+    Validations validations = new Validations();
+    String MESSAGE = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -134,11 +137,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //MOSTRA RESULTADO DA BUSCA
-    private void showSearchResults(ConvidadoModel convidadoModel) {
+    private void showSearchResults(String mensagem) {
         datalist.setText("");
-            datalist.append("CODIGO : "+convidadoModel.getCodigo()+" | NOME : "+convidadoModel.getNome()+" | CPF : "+convidadoModel.getCpf()+" | CONVIDADO_DE : "+convidadoModel.getConvidado_de()+" | RG : "+convidadoModel.getRg()+ " | STATUS : "+convidadoModel.getStatus()+" \n\n");
+        datalist.append(mensagem);
+            //datalist.append("CODIGO : "+convidadoModel.getCodigo()+" | NOME : "+convidadoModel.getNome()+" | CPF : "+convidadoModel.getCpf()+" | CONVIDADO_DE : "+convidadoModel.getConvidado_de()+" | RG : "+convidadoModel.getRg()+ " | STATUS : "+convidadoModel.getStatus()+" \n\n");
     }
 
+    //ATUALIZA STATUS
+    private void updateStatus(ConvidadoModel convidadoModel){
+        databaseHelper.updateStatus(convidadoModel);
+    }
     //REFRESH
     private void refreshData() {
 
@@ -148,7 +156,6 @@ public class MainActivity extends AppCompatActivity {
             datalist.append("CODIGO : "+convidadoModel.getCodigo()+" | NOME : "+convidadoModel.getNome()+" | CPF : "+convidadoModel.getCpf()+" | CONVIDADO_DE : "+convidadoModel.getConvidado_de()+" | RG : "+convidadoModel.getRg()+ " | STATUS : "+convidadoModel.getStatus()+" \n\n");
         }
     }
-
 
     //--------------------------------------- MÉTODO SCAN DO QRCODE -----------------------------------------------
     private void scanCode() {
@@ -165,7 +172,15 @@ public class MainActivity extends AppCompatActivity {
             builder.setTitle("Result");
             //builder.setMessage(result.getContents());
             ConvidadoModel convidadoModel = searchByScannedQrCode(result.getContents().toString());
-            builder.setMessage(convidadoModel.getNome() + " - " + convidadoModel.getCpf() + " - " + convidadoModel.getRg() + " - " + convidadoModel.getStatus());
+
+            //verifica se o convidado existe/ja entrou
+            if(validations.convidadoIsValid(convidadoModel).getExists() && !validations.convidadoIsValid(convidadoModel).getIsInside()){
+                //atualiza o status
+                updateStatus(convidadoModel);
+            }
+
+            builder.setMessage(MESSAGE);
+            //builder.setMessage(convidadoModel.getNome() + " - " + convidadoModel.getCpf() + " - " + convidadoModel.getRg() + " - " + convidadoModel.getStatus());
             builder.setPositiveButton("ok", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
@@ -195,7 +210,15 @@ public class MainActivity extends AppCompatActivity {
         delete_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showSearchResults(databaseHelper.getConvidadoByRg(id_input.getText().toString()));
+                ConvidadoModel convidadoModel = databaseHelper.getConvidadoByRg(id_input.getText().toString());
+
+                //verifica se convidado existe e se ele entrou
+                if(validations.convidadoIsValid(convidadoModel).getExists() && !validations.convidadoIsValid(convidadoModel).getIsInside()){
+                    //atualiza o status
+                    updateStatus(convidadoModel);
+                }
+
+                showSearchResults(validations.convidadoIsValid(convidadoModel).getMessage());
                 alertDialog.dismiss();
                 //refreshData();
 
@@ -260,8 +283,8 @@ public class MainActivity extends AppCompatActivity {
         View view=getLayoutInflater().inflate(R.layout.insert_dialog,null);
         final EditText id=view.findViewById(R.id.id);
         final EditText nome=view.findViewById(R.id.nome);
-        final EditText rg=view.findViewById(R.id.rg);
         final EditText cpf=view.findViewById(R.id.cpf);
+        final EditText rg=view.findViewById(R.id.rg);
         final EditText convidado_de=view.findViewById(R.id.convidado_de);
         final EditText status=view.findViewById(R.id.status);
         Button insertBtn=view.findViewById(R.id.insert_btn);
@@ -279,10 +302,11 @@ public class MainActivity extends AppCompatActivity {
                 convidadoModel.setCpf(cpf.getText().toString());
                 convidadoModel.setConvidado_de(convidado_de.getText().toString());
                 convidadoModel.setStatus(status.getText().toString());
-                databaseHelper.AddConvidado(convidadoModel);
+                    databaseHelper.AddConvidado(convidadoModel);
                 alertDialog.dismiss();
                 //refreshData();
             }
         });
     }
+
 }

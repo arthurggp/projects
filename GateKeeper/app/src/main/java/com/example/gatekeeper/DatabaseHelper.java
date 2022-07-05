@@ -29,6 +29,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String NOME = "nome";
     private static final String STATUS = "status";
 
+
     public DatabaseHelper(Context context) {
         super(context,NOME_BANCO,null,DATABASE_VERSION);
     }
@@ -60,9 +61,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         ContentValues contentValues=new ContentValues();
         contentValues.put(CODIGO, convidado.getCodigo());
-        contentValues.put(CPF, convidado.getCpf());
-        contentValues.put(RG, convidado.getRg());
         contentValues.put(NOME, convidado.getNome());
+        contentValues.put(RG, convidado.getRg());
+        contentValues.put(CPF, convidado.getCpf());
         contentValues.put(STATUS, convidado.getStatus());
         contentValues.put(CONVIDADO_DE, convidado.getConvidado_de());
 
@@ -122,6 +123,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     }
 
+    public int updateStatus(ConvidadoModel convidadoModel){
+        SQLiteDatabase db=this.getWritableDatabase();
+        ContentValues contentValues=new ContentValues();
+        contentValues.put(STATUS,"DENTRO");
+        return db.update(NOME_TABELA,contentValues,CODIGO+"=?",new String[]{String.valueOf(convidadoModel.getCodigo())});
+    }
+
     //DELETA CONVIDADO
     public void deleteConvidado(String id){
         SQLiteDatabase db=this.getWritableDatabase();
@@ -144,7 +152,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         Cursor cursor = db.query(
                 NOME_TABELA,
-                new String[]{CODIGO,CPF,RG,NOME,STATUS, CONVIDADO_DE},
+                new String[]{CODIGO,NOME,RG,CPF,STATUS, CONVIDADO_DE},
                 CPF+" = ?",
                 new String[]{String.valueOf(cpf)},
                 null,
@@ -169,7 +177,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         ConvidadoModel convidadoModel = new ConvidadoModel();
         Cursor cursor = db.query(
                 NOME_TABELA,
-                new String[]{CODIGO,CPF,RG,NOME,STATUS, CONVIDADO_DE},
+                new String[]{CODIGO,NOME, CPF,RG,STATUS, CONVIDADO_DE},
                 RG+" = ?",
                 new String[]{String.valueOf(rg)},
                 null,
@@ -212,4 +220,5 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return convidadoModel;
     }
+
 }
