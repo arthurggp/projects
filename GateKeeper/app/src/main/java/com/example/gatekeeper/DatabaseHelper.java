@@ -55,7 +55,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     //INSERE CONVIDADO
-    public void AddConvidado(ConvidadoModel convidado){
+    public void AddConvidado(ConvidadoModel convidado) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues contentValues=new ContentValues();
