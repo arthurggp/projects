@@ -11,8 +11,8 @@ public class Validations {
         Boolean exists = false;
 
         String message = "";
-        isInside = convidadoModel.getStatus() == "DENTRO";
-        exists = convidadoModel.getNome() != "";
+        isInside = convidadoModel.getStatus().equals("DENTRO");
+        exists = !convidadoModel.getNome().equals("");
 
         //VERIFICA SE O CONVIDADO EXISTE
         if (exists) {

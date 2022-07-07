@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,6 +15,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.example.gatekeeper.DAO.ConvidadoDaoImpl;
 import com.example.gatekeeper.models.ConvidadoModel;
 
 import com.example.gatekeeper.utils.ValidationStructure;
@@ -41,6 +43,8 @@ public class MainActivity extends AppCompatActivity {
     Validations validations = new Validations();
     String MESSAGE = "";
 
+    Context context;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -58,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
         datalist=findViewById(R.id.all_data_list);
         datalist_count=findViewById(R.id.data_list_count);
 
-        ParseJSON();
+       // ParseJSON();
 
         read.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -224,13 +228,9 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 ConvidadoModel convidadoModel = databaseHelper.getConvidadoByRg(id_input.getText().toString());
 
-                //verifica se convidado existe e se ele entrou
-                if(validations.convidadoIsValid(convidadoModel).getExists() && !validations.convidadoIsValid(convidadoModel).getIsInside()){
-                    //atualiza o status
-                    updateStatus(convidadoModel);
-                }
+                ShowConfirmDataDialog(convidadoModel);
 
-                showSearchResults(validations.convidadoIsValid(convidadoModel).getMessage());
+                //showSearchResults(validations.convidadoIsValid(convidadoModel).getMessage());
                 alertDialog.dismiss();
                 //refreshData();
 
@@ -322,4 +322,63 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-}
+    private void ShowConfirmDataDialog(ConvidadoModel convidadoModel) {
+
+        AlertDialog.Builder al = new AlertDialog.Builder(MainActivity.this);
+        ValidationStructure validationStructure = validations.convidadoIsValid(convidadoModel);
+
+
+        //verifica se convidado existe e se ele não entrou
+        if (validationStructure.getExists() && !validationStructure.getIsInside()) {
+
+           //AlertDialog.Builder al = new AlertDialog.Builder(MainActivity.this);
+            View view = getLayoutInflater().inflate(R.layout.confirmation_dialog, null);
+
+            final EditText nome = view.findViewById(R.id.nome);
+            nome.setText(convidadoModel.getNome());
+
+            final EditText cpf = view.findViewById(R.id.cpf);
+            cpf.setText(convidadoModel.getCpf());
+
+            final EditText rg = view.findViewById(R.id.rg);
+            rg.setText(convidadoModel.getRg());
+
+            final EditText status = view.findViewById(R.id.status);
+            status.setText(convidadoModel.getStatus());
+
+            Button confirmBtn = view.findViewById(R.id.confirm_button);
+            Button cancelBtn = view.findViewById(R.id.cancel_button);
+            al.setView(view);
+
+            final AlertDialog alertDialog = al.show();
+
+            //botao cancela
+            cancelBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    alertDialog.dismiss();
+                }
+            });
+
+            //botao confirma
+            confirmBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    //atualiza o status
+                    updateStatus(convidadoModel);
+                    alertDialog.dismiss();
+
+                    new AlertDialog.Builder(view.getContext()).setTitle("Entrada Confirmada!").setMessage(validationStructure.getMessage()).show();
+
+                    //refreshData();
+                }
+            });
+        }else{
+            al.setTitle("Erro").setMessage(validationStructure.getMessage());
+            final AlertDialog alertDialog = al.show();
+        }
+
+        }
+
+    }

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/confirm_data" >
+
+    <LinearLayout
+        android:id="@+id/line1"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="CONFIRMAÇÃO DE ENTRADA"
+            style="@style/TextAppearance.Compat.Notification.Title"
+            android:padding="10dp"
+            android:gravity="center"
+            />
+
+        <!--CAMPO CPF-->
+        <EditText
+            android:layout_margin="5dp"
+            android:id="@+id/nome"
+            android:hint="NOME"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="none"/>
+
+        <!--CAMPO RG-->
+        <EditText
+            android:layout_margin="5dp"
+            android:id="@+id/cpf"
+            android:hint="CPF"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="none"/>
+
+        <!--CAMPO NOME-->
+        <EditText
+            android:layout_margin="5dp"
+            android:id="@+id/rg"
+            android:hint="RG"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="none"/>
+
+        <!--CAMPO STATUS-->
+        <EditText
+            android:layout_margin="5dp"
+            android:id="@+id/status"
+            android:hint="STATUS"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="none"/>
+
+        <!--BOTÃO ADD CONVIDADO-->
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="CONFIRMAR ENTRADA"
+            android:layout_centerInParent="true"
+            android:id="@+id/confirm_button"/>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="CANCELAR"
+            android:layout_centerInParent="true"
+            android:id="@+id/cancel_button"/>
+
+    </LinearLayout>
+
+</RelativeLayout>
