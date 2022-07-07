@@ -85,7 +85,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if(cursor!=null){
             cursor.moveToFirst();
         }
-                                                         //CODIGO               ,NOME                  ,CPF                   ,RG                   ,STATUS                 ,CONVIDADO DE
+        //CODIGO               ,NOME                  ,CPF                   ,RG                   ,STATUS                 ,CONVIDADO DE
         ConvidadoModel convidadoModel = new ConvidadoModel(cursor.getString(0),cursor.getString(1),cursor.getString(2),cursor.getString(3), cursor.getString(4),cursor.getString(5));
         db.close();
 
@@ -101,7 +101,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         if(cursor.moveToFirst()){
             do{
-                                                                  //CODIGO               ,NOME                  ,CPF                   ,RG                   ,STATUS                 ,CONVIDADO DE
+                //CODIGO               ,NOME                  ,CPF                   ,RG                   ,STATUS                 ,CONVIDADO DE
                 ConvidadoModel convidadoModel = new ConvidadoModel(cursor.getString(0),cursor.getString(1),cursor.getString(2),cursor.getString(3), cursor.getString(4),cursor.getString(5));
                 convidadoModelList.add(convidadoModel);
             }while (cursor.moveToNext());

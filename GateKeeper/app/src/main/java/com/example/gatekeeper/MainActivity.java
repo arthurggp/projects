@@ -6,13 +6,19 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import com.example.gatekeeper.models.ConvidadoModel;
-import com.example.gatekeeper.models.ValidationStructure;
+
+import com.example.gatekeeper.utils.ValidationStructure;
+import com.example.gatekeeper.utils.Validations;
+
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
 
@@ -28,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
 
     DatabaseHelper databaseHelper;
     TextView datalist;
+    AutoCompleteTextView teste;
     TextView datalist_count;
     String FILE_NAME = "convidados.json";
     String CHARSET = "UTF-8";
@@ -37,7 +44,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        ParseJSON();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -52,11 +58,12 @@ public class MainActivity extends AppCompatActivity {
         datalist=findViewById(R.id.all_data_list);
         datalist_count=findViewById(R.id.data_list_count);
 
+        ParseJSON();
+
         read.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //refreshData();
-
             }
         });
 
@@ -88,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             JSONObject jsonObject = new JSONObject(JsonDataFromAssets());
-            JSONArray jsonArray= jsonObject.getJSONArray("Convidados");
+            JSONArray jsonArray= jsonObject.getJSONArray("convidados");
 
             for(int i=0;i<jsonArray.length();i++) {
                 JSONObject data = jsonArray.getJSONObject(i);
@@ -100,6 +107,8 @@ public class MainActivity extends AppCompatActivity {
                 convidadoModel.setCpf(data.getString("CPF"));
                 convidadoModel.setStatus(data.getString("STATUS"));
 
+                databaseHelper.AddConvidado(convidadoModel);
+                Log.i("ADD CONVIDADO", "CONVIDADO: "+ convidadoModel.getNome() + " ADICIONADO; ");
             }
 
         } catch (JSONException e) {
@@ -198,6 +207,8 @@ public class MainActivity extends AppCompatActivity {
         return convidadoModel;
     }
 
+    //BUSCA POR NOME
+
     //BUSCA POR RG
     private void searchByRg() {
         AlertDialog.Builder al=new AlertDialog.Builder(MainActivity.this);
@@ -207,6 +218,7 @@ public class MainActivity extends AppCompatActivity {
         Button delete_btn=view.findViewById(R.id.delete_btn);
         final AlertDialog alertDialog=al.show();
 
+        //MÉTODO DE CLICK DO BOTAO CONFIRMAR
         delete_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -281,6 +293,7 @@ public class MainActivity extends AppCompatActivity {
     private void ShowInputDialog() {
         AlertDialog.Builder al=new AlertDialog.Builder(MainActivity.this);
         View view=getLayoutInflater().inflate(R.layout.insert_dialog,null);
+
         final EditText id=view.findViewById(R.id.id);
         final EditText nome=view.findViewById(R.id.nome);
         final EditText cpf=view.findViewById(R.id.cpf);

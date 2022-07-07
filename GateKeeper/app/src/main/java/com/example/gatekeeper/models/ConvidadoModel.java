@@ -1,5 +1,10 @@
 package com.example.gatekeeper.models;
 
+import android.database.Cursor;
+
+import org.greenrobot.greendao.annotation.Entity;
+
+//@Entity
 public class ConvidadoModel {
     String codigo   = "";
     String nome     = "";
@@ -8,7 +13,9 @@ public class ConvidadoModel {
     String status   = "";
     String convidado_de = "";
 
-    public ConvidadoModel(String codigo, String nome,String cpf,String rg,String status, String convidado_de){
+    public ConvidadoModel() { }
+
+    public ConvidadoModel(String codigo, String nome, String cpf, String rg, String status, String convidado_de){
         this.codigo = codigo;
         this.nome = nome;
         this.cpf = cpf;
@@ -16,8 +23,14 @@ public class ConvidadoModel {
         this.status = status;
         this.convidado_de = convidado_de;
     }
-
-    public ConvidadoModel(){
+    
+    public ConvidadoModel(Cursor data) {
+        this.codigo = data.getString(0);
+        this.nome = data.getString(1);
+        this.cpf = data.getString(2);
+        this.rg = data.getString(3);
+        this.status = data.getString(4);
+        this.convidado_de = data.getString(5);
     }
 
     public String getCodigo() {
