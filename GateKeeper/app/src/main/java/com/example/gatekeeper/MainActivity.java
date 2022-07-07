@@ -6,12 +6,17 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import com.example.gatekeeper.models.ConvidadoModel;
+import com.example.gatekeeper.utils.ValidationStructure;
+import com.example.gatekeeper.utils.Validations;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
 
@@ -27,14 +32,23 @@ public class MainActivity extends AppCompatActivity {
 
     DatabaseHelper databaseHelper;
     TextView datalist;
+    AutoCompleteTextView teste;
     TextView datalist_count;
     String FILE_NAME = "convidados.json";
     String CHARSET = "UTF-8";
+    Validations validations = new Validations();
+    String MESSAGE = "";
+
+
+
+    private static final String[] COUNTRIES = new String[] {
+            "Belgium", "France", "Italy", "Germany", "Spain"
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        ParseJSON();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -48,6 +62,8 @@ public class MainActivity extends AppCompatActivity {
         Button read=findViewById(R.id.refresh_data);
         datalist=findViewById(R.id.all_data_list);
         datalist_count=findViewById(R.id.data_list_count);
+
+        ParseJSON();
 
         read.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -84,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             JSONObject jsonObject = new JSONObject(JsonDataFromAssets());
-            JSONArray jsonArray= jsonObject.getJSONArray("Convidados");
+            JSONArray jsonArray= jsonObject.getJSONArray("convidados");
 
             for(int i=0;i<jsonArray.length();i++) {
                 JSONObject data = jsonArray.getJSONObject(i);
@@ -96,6 +112,8 @@ public class MainActivity extends AppCompatActivity {
                 convidadoModel.setCpf(data.getString("CPF"));
                 convidadoModel.setStatus(data.getString("STATUS"));
 
+                databaseHelper.AddConvidado(convidadoModel);
+                Log.i("ADD CONVIDADO", "CONVIDADO: "+ convidadoModel.getNome() + " ADICIONADO; ");
             }
 
         } catch (JSONException e) {
@@ -133,11 +151,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //MOSTRA RESULTADO DA BUSCA
-    private void showSearchResults(ConvidadoModel convidadoModel) {
+    private void showSearchResults(String mensagem) {
         datalist.setText("");
-            datalist.append("CODIGO : "+convidadoModel.getCodigo()+" | NOME : "+convidadoModel.getNome()+" | CPF : "+convidadoModel.getCpf()+" | CONVIDADO_DE : "+convidadoModel.getConvidado_de()+" | RG : "+convidadoModel.getRg()+ " | STATUS : "+convidadoModel.getStatus()+" \n\n");
+        datalist.append(mensagem);
+            //datalist.append("CODIGO : "+convidadoModel.getCodigo()+" | NOME : "+convidadoModel.getNome()+" | CPF : "+convidadoModel.getCpf()+" | CONVIDADO_DE : "+convidadoModel.getConvidado_de()+" | RG : "+convidadoModel.getRg()+ " | STATUS : "+convidadoModel.getStatus()+" \n\n");
     }
 
+    //ATUALIZA STATUS
+    private void updateStatus(ConvidadoModel convidadoModel){
+        databaseHelper.updateStatus(convidadoModel);
+    }
     //REFRESH
     private void refreshData() {
 
@@ -147,7 +170,6 @@ public class MainActivity extends AppCompatActivity {
             datalist.append("CODIGO : "+convidadoModel.getCodigo()+" | NOME : "+convidadoModel.getNome()+" | CPF : "+convidadoModel.getCpf()+" | CONVIDADO_DE : "+convidadoModel.getConvidado_de()+" | RG : "+convidadoModel.getRg()+ " | STATUS : "+convidadoModel.getStatus()+" \n\n");
         }
     }
-
 
     //--------------------------------------- MÉTODO SCAN DO QRCODE -----------------------------------------------
     private void scanCode() {
@@ -164,7 +186,15 @@ public class MainActivity extends AppCompatActivity {
             builder.setTitle("Result");
             //builder.setMessage(result.getContents());
             ConvidadoModel convidadoModel = searchByScannedQrCode(result.getContents().toString());
-            builder.setMessage(convidadoModel.getNome() + " - " + convidadoModel.getCpf() + " - " + convidadoModel.getRg() + " - " + convidadoModel.getStatus());
+
+            //verifica se o convidado existe/ja entrou
+            if(validations.convidadoIsValid(convidadoModel).getExists() && !validations.convidadoIsValid(convidadoModel).getIsInside()){
+                //atualiza o status
+                updateStatus(convidadoModel);
+            }
+
+            builder.setMessage(MESSAGE);
+            //builder.setMessage(convidadoModel.getNome() + " - " + convidadoModel.getCpf() + " - " + convidadoModel.getRg() + " - " + convidadoModel.getStatus());
             builder.setPositiveButton("ok", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
@@ -182,6 +212,8 @@ public class MainActivity extends AppCompatActivity {
         return convidadoModel;
     }
 
+    //BUSCA POR NOME
+
     //BUSCA POR RG
     private void searchByRg() {
         AlertDialog.Builder al=new AlertDialog.Builder(MainActivity.this);
@@ -191,10 +223,19 @@ public class MainActivity extends AppCompatActivity {
         Button delete_btn=view.findViewById(R.id.delete_btn);
         final AlertDialog alertDialog=al.show();
 
+        //MÉTODO DE CLICK DO BOTAO CONFIRMAR
         delete_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showSearchResults(databaseHelper.getConvidadoByRg(id_input.getText().toString()));
+                ConvidadoModel convidadoModel = databaseHelper.getConvidadoByRg(id_input.getText().toString());
+
+                //verifica se convidado existe e se ele entrou
+                if(validations.convidadoIsValid(convidadoModel).getExists() && !validations.convidadoIsValid(convidadoModel).getIsInside()){
+                    //atualiza o status
+                    updateStatus(convidadoModel);
+                }
+
+                showSearchResults(validations.convidadoIsValid(convidadoModel).getMessage());
                 alertDialog.dismiss();
                 //refreshData();
 
@@ -257,10 +298,11 @@ public class MainActivity extends AppCompatActivity {
     private void ShowInputDialog() {
         AlertDialog.Builder al=new AlertDialog.Builder(MainActivity.this);
         View view=getLayoutInflater().inflate(R.layout.insert_dialog,null);
+
         final EditText id=view.findViewById(R.id.id);
         final EditText nome=view.findViewById(R.id.nome);
-        final EditText rg=view.findViewById(R.id.rg);
         final EditText cpf=view.findViewById(R.id.cpf);
+        final EditText rg=view.findViewById(R.id.rg);
         final EditText convidado_de=view.findViewById(R.id.convidado_de);
         final EditText status=view.findViewById(R.id.status);
         Button insertBtn=view.findViewById(R.id.insert_btn);
@@ -278,10 +320,11 @@ public class MainActivity extends AppCompatActivity {
                 convidadoModel.setCpf(cpf.getText().toString());
                 convidadoModel.setConvidado_de(convidado_de.getText().toString());
                 convidadoModel.setStatus(status.getText().toString());
-                databaseHelper.AddConvidado(convidadoModel);
+                    databaseHelper.AddConvidado(convidadoModel);
                 alertDialog.dismiss();
                 //refreshData();
             }
         });
     }
+
 }
