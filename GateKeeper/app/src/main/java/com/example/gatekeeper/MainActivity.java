@@ -15,8 +15,10 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.example.gatekeeper.models.ConvidadoModel;
+
 import com.example.gatekeeper.utils.ValidationStructure;
 import com.example.gatekeeper.utils.Validations;
+
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
 
@@ -38,13 +40,6 @@ public class MainActivity extends AppCompatActivity {
     String CHARSET = "UTF-8";
     Validations validations = new Validations();
     String MESSAGE = "";
-
-
-
-    private static final String[] COUNTRIES = new String[] {
-            "Belgium", "France", "Italy", "Germany", "Spain"
-    };
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
