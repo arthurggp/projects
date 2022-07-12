@@ -76,13 +76,6 @@ public class ConvidadoModel {
     }
 
     public String toString() {
-        return "Convidado{" +
-                "codigo='" + codigo + '\'' +
-                "nome='" + nome + '\'' +
-                ", rg=" + rg +'\'' +
-                ", cpf=" + cpf + '\'' +
-                ", status=" + status +'\'' +
-                ", convidado_de=" + convidado_de +
-                '}';
+        return nome;
     }
 }

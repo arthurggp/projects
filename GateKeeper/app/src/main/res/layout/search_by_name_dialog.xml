@@ -6,7 +6,6 @@
     android:layout_height="wrap_content">
     <TextView
         android:text="BUSCA POR NOME"
-        android:textColor="#fff"
         style="@style/TextAppearance.Compat.Notification.Title"
         android:padding="10dp"
         android:gravity="center"

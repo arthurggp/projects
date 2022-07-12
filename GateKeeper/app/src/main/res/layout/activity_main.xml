@@ -8,89 +8,70 @@
 
     <LinearLayout
         android:id="@+id/line1"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <Button
-            android:id="@+id/insert_data"
-            android:text="INSERT"
-            android:layout_weight="1"
-            android:textColor="#FFF"
+        <TextView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-        <View
-            android:background="#fff"
-            android:layout_width="2dp"
-            android:layout_height="match_parent"/>
-        <Button
-            android:id="@+id/update_data"
-            android:text="UPDATE"
-            android:textColor="#FFF"
-            android:layout_weight="1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-        <View
-            android:background="#fff"
-            android:layout_width="2dp"
-            android:layout_height="match_parent"/>
-        <Button
-            android:id="@+id/delete_data"
-            android:text="BUSCAR"
-            android:textColor="#FFF"
-            android:layout_weight="1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-        <View
-            android:background="#fff"
-            android:layout_width="2dp"
-            android:layout_height="match_parent"/>
-        <Button
-            android:id="@+id/refresh_data"
-            android:text="READ"
-            android:textColor="#FFF"
-            android:layout_weight="1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="match_parent"
+            android:textAlignment="center"
+            android:text="BUSCA POR QR CODE"/>
 
-        <View
-            android:background="#fff"
-            android:layout_width="2dp"
-            android:layout_height="match_parent"/>
+        <Button
+            android:id="@+id/btn_search_by_scan"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="SCAN" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textAlignment="center"
+            android:text="BUSCA POR NOME, RG OU CPF"/>
+
+        <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:id="@+id/group">
+
+            <RadioButton android:id="@+id/radio_cpf"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="CPF"
+                android:onClick="onRadioButtonClicked"/>
+
+            <RadioButton android:id="@+id/radio_rg"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="RG"
+                android:onClick="onRadioButtonClicked"/>
+
+            <RadioButton android:id="@+id/radio_nome"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="NOME"
+                android:onClick="onRadioButtonClicked"/>
+        </RadioGroup>
+
+        <AutoCompleteTextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/data_to_search"
+            android:completionThreshold="1"/>
+
+        <Button
+            android:id="@+id/btn_search"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="BUSCAR" />
+
+
+
+
     </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/line2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/line1"
-        android:orientation="vertical">
-
-        <Button
-            android:id="@+id/btn_scan"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Scan" />
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/data_list_count"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/line2"
-        android:gravity="center"
-        android:padding="10dp"
-        android:text="TODOS OS CONVIDADOS"
-        android:textColor="#fff" />
-
-    <TextView
-        android:id="@+id/all_data_list"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/data_list_count"
-        android:layout_marginTop="-1dp"
-        android:padding="10dp"
-        android:textColor="#000" />
 
 
 </RelativeLayout>

@@ -4,20 +4,28 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Context;
 import android.content.DialogInterface;
+import android.os.Build;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Filter;
+import android.widget.Filterable;
+import android.widget.ListView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 
-import com.example.gatekeeper.DAO.ConvidadoDaoImpl;
 import com.example.gatekeeper.models.ConvidadoModel;
 
+import com.example.gatekeeper.utils.AutoCompleteAdapter;
+import com.example.gatekeeper.utils.CustomAdapter;
+import com.example.gatekeeper.utils.MessageMaker;
 import com.example.gatekeeper.utils.ValidationStructure;
 import com.example.gatekeeper.utils.Validations;
 
@@ -30,93 +38,142 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class MainActivity extends AppCompatActivity {
 
     DatabaseHelper databaseHelper;
-    TextView datalist;
-    AutoCompleteTextView teste;
-    TextView datalist_count;
     String FILE_NAME = "convidados.json";
     String CHARSET = "UTF-8";
     Validations validations = new Validations();
     String MESSAGE = "";
-
-    Context context;
+    MessageMaker messageMaker = new MessageMaker();
+    String selected = "";
+    List<ConvidadoModel> convidados;
+    ListView listview;
+    AutoCompleteTextView data_to_search;
+    CustomAdapter adapter;
+    Button btn_scan;
+    Button btn_search;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        databaseHelper=new DatabaseHelper(MainActivity.this);
 
-        Button btn_scan = findViewById(R.id.btn_scan);
+        //DECLARA BOTÕES
+        btn_scan = findViewById(R.id.btn_search_by_scan);
         btn_scan.setOnClickListener(v-> scanCode());
 
-        databaseHelper=new DatabaseHelper(MainActivity.this);
-        Button delete=findViewById(R.id.delete_data);
-        Button insert=findViewById(R.id.insert_data);
-        Button update=findViewById(R.id.update_data);
-        Button read=findViewById(R.id.refresh_data);
-        datalist=findViewById(R.id.all_data_list);
-        datalist_count=findViewById(R.id.data_list_count);
+        btn_search = findViewById(R.id.btn_search);
+        btn_search.setOnClickListener(v-> search(selected,data_to_search.getText().toString()));
 
-       // ParseJSON();
 
-        read.setOnClickListener(new View.OnClickListener() {
+        //LISTA DE CONVIDADOS
+        convidados = new ArrayList<>();
+        convidados = databaseHelper.getAllConvidados();
+
+        data_to_search = findViewById(R.id.data_to_search);
+        adapter = new CustomAdapter(this,convidados);
+
+
+        //LISTENNER DOS RADIOBUTTONS
+        final RadioGroup group = (RadioGroup) findViewById(R.id.group);
+        group.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
-            public void onClick(View v) {
-                //refreshData();
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                RadioButton radioButton = (RadioButton) group.findViewById(checkedId);
+                (MainActivity.this).selected = radioButton.getText().toString();
+                data_to_search.setHint("DIGITE O "+ selected);
             }
         });
 
-        insert.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ShowInputDialog();
-            }
-        });
-
-        update.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showUpdateIdDialog();
-            }
-        });
-
-        delete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                searchByRg();
-            }
-        });
+        //PREENCHE BASE DE DADOS
+        ParseJSON();
 
     }
+
+    //RETONRA ARRAY NOMES
+    public List<String> returnArrayWithNames(){
+        List<String> array = new ArrayList<>();
+        List<ConvidadoModel> convidados = databaseHelper.getAllConvidados();
+
+        for(ConvidadoModel item: convidados){
+            array.add(item.getNome());
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            convidados.forEach(item -> {
+                array.add(item.getNome());
+            });
+        }
+
+        return array;
+    }
+
+    //RETORNA ARRAY CPF
+    public ArrayList<String> returnArrayWithCpf(){
+        ArrayList<String> array = new ArrayList<>();
+        List<ConvidadoModel> convidados = databaseHelper.getAllConvidadosArray();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            convidados.forEach(item -> {
+                array.add(item.getCpf().toString());
+            });
+        }
+
+        return array;
+    }
+
+
+    //RETORNA ARRAY RG
+    public ArrayList<String> returnArrayWithRg(){
+        ArrayList<String> array = new ArrayList<>();
+        List<ConvidadoModel> convidados = databaseHelper.getAllConvidadosArray();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            convidados.forEach(item -> {
+                array.add(item.getRg().toString());
+            });
+        }
+
+        return array;
+    }
+
 
     //TRANSFORMA JSON STRING EM OBJETO
     public void ParseJSON(){
 
-        try {
-            JSONObject jsonObject = new JSONObject(JsonDataFromAssets());
-            JSONArray jsonArray= jsonObject.getJSONArray("convidados");
+        int quantidade = databaseHelper.getTotalCount();
 
-            for(int i=0;i<jsonArray.length();i++) {
-                JSONObject data = jsonArray.getJSONObject(i);
-                ConvidadoModel convidadoModel = new ConvidadoModel();
-                convidadoModel.setCodigo(data.getString("CODIGO"));
-                convidadoModel.setConvidado_de(data.getString("CONVIDADO_DE"));
-                convidadoModel.setNome(data.getString("NOME"));
-                convidadoModel.setRg(data.getString("RG"));
-                convidadoModel.setCpf(data.getString("CPF"));
-                convidadoModel.setStatus(data.getString("STATUS"));
+        //VERIFICA SE A BASE JA FOI CARREGADA
+        if(quantidade == 0) {
 
-                databaseHelper.AddConvidado(convidadoModel);
-                Log.i("ADD CONVIDADO", "CONVIDADO: "+ convidadoModel.getNome() + " ADICIONADO; ");
+            try {
+                JSONObject jsonObject = new JSONObject(JsonDataFromAssets());
+                JSONArray jsonArray = jsonObject.getJSONArray("convidados");
+
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject data = jsonArray.getJSONObject(i);
+                    ConvidadoModel convidadoModel = new ConvidadoModel();
+                    convidadoModel.setCodigo(data.getString("CODIGO"));
+                    convidadoModel.setConvidado_de(data.getString("CONVIDADO_DE"));
+                    convidadoModel.setNome(data.getString("NOME"));
+                    convidadoModel.setRg(data.getString("RG"));
+                    convidadoModel.setCpf(data.getString("CPF"));
+                    convidadoModel.setStatus(data.getString("STATUS"));
+
+                    databaseHelper.AddConvidado(convidadoModel);
+                    Log.i("ADD CONVIDADO", "CONVIDADO: " + convidadoModel.getNome() + " ADICIONADO; ");
+                }
+
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
-
-        } catch (JSONException e) {
-            e.printStackTrace();
         }
 
     }
@@ -144,31 +201,12 @@ public class MainActivity extends AppCompatActivity {
         return json;
     }
 
-    //POPULA TABELA
-    private void fillDataBase(ConvidadoModel convidadoModel){
-
-    }
-
-    //MOSTRA RESULTADO DA BUSCA
-    private void showSearchResults(String mensagem) {
-        datalist.setText("");
-        datalist.append(mensagem);
-            //datalist.append("CODIGO : "+convidadoModel.getCodigo()+" | NOME : "+convidadoModel.getNome()+" | CPF : "+convidadoModel.getCpf()+" | CONVIDADO_DE : "+convidadoModel.getConvidado_de()+" | RG : "+convidadoModel.getRg()+ " | STATUS : "+convidadoModel.getStatus()+" \n\n");
-    }
 
     //ATUALIZA STATUS
     private void updateStatus(ConvidadoModel convidadoModel){
         databaseHelper.updateStatus(convidadoModel);
     }
-    //REFRESH
-    private void refreshData() {
 
-        List<ConvidadoModel> convidadoModelList=databaseHelper.getAllConvidados();
-        datalist.setText("");
-        for(ConvidadoModel convidadoModel:convidadoModelList){
-            datalist.append("CODIGO : "+convidadoModel.getCodigo()+" | NOME : "+convidadoModel.getNome()+" | CPF : "+convidadoModel.getCpf()+" | CONVIDADO_DE : "+convidadoModel.getConvidado_de()+" | RG : "+convidadoModel.getRg()+ " | STATUS : "+convidadoModel.getStatus()+" \n\n");
-        }
-    }
 
     //--------------------------------------- MÉTODO SCAN DO QRCODE -----------------------------------------------
     private void scanCode() {
@@ -183,8 +221,7 @@ public class MainActivity extends AppCompatActivity {
         if(result.getContents() != null){
             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
             builder.setTitle("Result");
-            //builder.setMessage(result.getContents());
-            ConvidadoModel convidadoModel = searchByScannedQrCode(result.getContents().toString());
+            ConvidadoModel convidadoModel = searchByScan(result.getContents().toString());
 
             //verifica se o convidado existe/ja entrou
             if(validations.convidadoIsValid(convidadoModel).getExists() && !validations.convidadoIsValid(convidadoModel).getIsInside()){
@@ -193,7 +230,6 @@ public class MainActivity extends AppCompatActivity {
             }
 
             builder.setMessage(MESSAGE);
-            //builder.setMessage(convidadoModel.getNome() + " - " + convidadoModel.getCpf() + " - " + convidadoModel.getRg() + " - " + convidadoModel.getStatus());
             builder.setPositiveButton("ok", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
@@ -205,121 +241,61 @@ public class MainActivity extends AppCompatActivity {
     //----------------------------------------------------------------------------------------------------------------
 
     //BUSCA NA BASE PELO CODIGO DO QRCODE
-    private ConvidadoModel searchByScannedQrCode(String code){
+    private ConvidadoModel searchByScan(String code){
         ConvidadoModel convidadoModel = new ConvidadoModel();
         convidadoModel = databaseHelper.getConvidado(Integer.parseInt(code));
         return convidadoModel;
     }
 
+    private void search(String type, String data){
+        switch (type){
+            case "NOME":
+                searchByName(data);
+                break;
+            case "CPF":
+                searchByCpf(data);
+                break;
+            case "RG":
+                searchByRg(data);
+                break;
+        }
+    }
+
     //BUSCA POR NOME
+    private void searchByName(String name){
+        ConvidadoModel convidadoModel = databaseHelper.getConvidadoByName(name);
+        ShowConfirmDataDialog(convidadoModel);
+    }
+
+    //BUSCA POR CPF
+    private void searchByCpf(String cpf) {
+        ConvidadoModel convidadoModel = databaseHelper.getConvidadoByCpf(cpf);
+        ShowConfirmDataDialog(convidadoModel);
+    }
 
     //BUSCA POR RG
-    private void searchByRg() {
-        AlertDialog.Builder al=new AlertDialog.Builder(MainActivity.this);
-        View view=getLayoutInflater().inflate(R.layout.search_by_rg_dialog,null);
-        al.setView(view);
-        final EditText id_input=view.findViewById(R.id.id_input);
-        Button delete_btn=view.findViewById(R.id.delete_btn);
-        final AlertDialog alertDialog=al.show();
-
-        //MÉTODO DE CLICK DO BOTAO CONFIRMAR
-        delete_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ConvidadoModel convidadoModel = databaseHelper.getConvidadoByRg(id_input.getText().toString());
-
-                ShowConfirmDataDialog(convidadoModel);
-
-                //showSearchResults(validations.convidadoIsValid(convidadoModel).getMessage());
-                alertDialog.dismiss();
-                //refreshData();
-
-            }
-        });
+    private void searchByRg(String rg) {
+        ConvidadoModel convidadoModel = databaseHelper.getConvidadoByRg(rg);
+        ShowConfirmDataDialog(convidadoModel);
     }
 
-    private void showUpdateIdDialog() {
-        AlertDialog.Builder al=new AlertDialog.Builder(MainActivity.this);
-        View view=getLayoutInflater().inflate(R.layout.update_id_dialog,null);
-        al.setView(view);
-        final EditText id_input=view.findViewById(R.id.id_input);
-        Button fetch_btn=view.findViewById(R.id.update_id_btn);
-        final AlertDialog alertDialog=al.show();
-        fetch_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showDataDialog(id_input.getText().toString());
-                alertDialog.dismiss();
-                //refreshData();
-            }
-        });
+    public void onRadioButtonClicked(View view) {
+        // Is the button now checked?
+        boolean checked = ((RadioButton) view).isChecked();
 
-    }
-
-    private void showDataDialog(final String codigo) {
-        ConvidadoModel convidadoModel=databaseHelper.getConvidado(Integer.parseInt(codigo));
-        AlertDialog.Builder al=new AlertDialog.Builder(MainActivity.this);
-        View view=getLayoutInflater().inflate(R.layout.update_dialog,null);
-        //final EditText id=view.findViewById(R.id.id);
-        final EditText nome=view.findViewById(R.id.nome);
-        final EditText rg=view.findViewById(R.id.rg);
-        final EditText cpf=view.findViewById(R.id.cpf);
-        final EditText status=view.findViewById(R.id.status);
-        Button update_btn=view.findViewById(R.id.update_btn);
-        al.setView(view);
-
-        nome.setText(convidadoModel.getNome());
-        rg.setText(convidadoModel.getRg());
-        cpf.setText(convidadoModel.getCpf());
-        status.setText(convidadoModel.getStatus());
-
-        final AlertDialog alertDialog=al.show();
-        update_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ConvidadoModel convidadoModel=new ConvidadoModel();
-                convidadoModel.setNome(nome.getText().toString());
-                convidadoModel.setCodigo(codigo.toString());
-                convidadoModel.setRg(rg.getText().toString());
-                convidadoModel.setCpf(cpf.getText().toString());
-                convidadoModel.setStatus(status.getText().toString());
-                databaseHelper.updateConvidado(convidadoModel);
-                alertDialog.dismiss();
-                //refreshData();
-            }
-        });
-    }
-
-    private void ShowInputDialog() {
-        AlertDialog.Builder al=new AlertDialog.Builder(MainActivity.this);
-        View view=getLayoutInflater().inflate(R.layout.insert_dialog,null);
-
-        final EditText id=view.findViewById(R.id.id);
-        final EditText nome=view.findViewById(R.id.nome);
-        final EditText cpf=view.findViewById(R.id.cpf);
-        final EditText rg=view.findViewById(R.id.rg);
-        final EditText convidado_de=view.findViewById(R.id.convidado_de);
-        final EditText status=view.findViewById(R.id.status);
-        Button insertBtn=view.findViewById(R.id.insert_btn);
-        al.setView(view);
-
-        final AlertDialog alertDialog=al.show();
-
-        insertBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ConvidadoModel convidadoModel=new ConvidadoModel();
-                convidadoModel.setCodigo(id.getText().toString());
-                convidadoModel.setNome(nome.getText().toString());
-                convidadoModel.setRg(rg.getText().toString());
-                convidadoModel.setCpf(cpf.getText().toString());
-                convidadoModel.setConvidado_de(convidado_de.getText().toString());
-                convidadoModel.setStatus(status.getText().toString());
-                    databaseHelper.AddConvidado(convidadoModel);
-                alertDialog.dismiss();
-                //refreshData();
-            }
-        });
+        // Check which radio button was clicked
+        switch(view.getId()) {
+            case R.id.radio_nome:
+                if (checked)
+                    data_to_search.setAdapter(adapter);
+                break;
+            case R.id.radio_cpf:
+                if (checked)
+                    break;
+            case R.id.radio_rg:
+                if (checked)
+                    break;
+        }
     }
 
     private void ShowConfirmDataDialog(ConvidadoModel convidadoModel) {
@@ -369,9 +345,9 @@ public class MainActivity extends AppCompatActivity {
                     updateStatus(convidadoModel);
                     alertDialog.dismiss();
 
-                    new AlertDialog.Builder(view.getContext()).setTitle("Entrada Confirmada!").setMessage(validationStructure.getMessage()).show();
+                    //mostra mensagem
+                    messageMaker.MessageMaker(view,"Entrada Confirmada!", validationStructure.getMessage());;
 
-                    //refreshData();
                 }
             });
         }else{

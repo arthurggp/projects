@@ -1,8 +1,8 @@
 package com.example.gatekeeper.enums;
 
 public enum StatusEnum {
-    DENTRO(1, "Dentro"),
-    FORA(2, "Fora");
+    DENTRO(1, "DENTRO"),
+    FORA(2, "FORA");
 
     private final Integer codigo;
     private final String descricao;

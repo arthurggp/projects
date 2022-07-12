@@ -111,30 +111,31 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return convidadoModelList;
     }
 
-    //ATUALIZA CONVIDADO
-    public int updateConvidado(ConvidadoModel convidadoModel){
-        SQLiteDatabase db=this.getWritableDatabase();
-        ContentValues contentValues=new ContentValues();
-        contentValues.put(NOME,convidadoModel.getNome());
-        contentValues.put(CPF,convidadoModel.getCpf());
-        contentValues.put(RG,convidadoModel.getRg());
-        contentValues.put(STATUS,convidadoModel.getStatus());
-        return db.update(NOME_TABELA,contentValues,CODIGO+"=?",new String[]{String.valueOf(convidadoModel.getCodigo())});
+    //RETORNA CONVIDADOS EM ARRAYLIST
+    public ArrayList<ConvidadoModel> getAllConvidadosArray(){
+        ArrayList<ConvidadoModel> convidadoModelList = new ArrayList<>();
+        String query = "SELECT * from "+NOME_TABELA;
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(query,null);
 
+        if(cursor.moveToFirst()){
+            do{
+                                                                    //CODIGO               ,NOME                  ,CPF                   ,RG                   ,STATUS                 ,CONVIDADO DE
+                //ConvidadoModel convidadoModel = new ConvidadoModel(cursor.getString(0),cursor.getString(1),cursor.getString(2),cursor.getString(3), cursor.getString(4),cursor.getString(5));
+                convidadoModelList.add(new ConvidadoModel(cursor.getString(0),cursor.getString(1),cursor.getString(2),cursor.getString(3), cursor.getString(4),cursor.getString(5)));
+            }while (cursor.moveToNext());
+        }
+        db.close();
+
+        return convidadoModelList;
     }
+
 
     public int updateStatus(ConvidadoModel convidadoModel){
         SQLiteDatabase db=this.getWritableDatabase();
         ContentValues contentValues=new ContentValues();
         contentValues.put(STATUS,"DENTRO");
         return db.update(NOME_TABELA,contentValues,CODIGO+"=?",new String[]{String.valueOf(convidadoModel.getCodigo())});
-    }
-
-    //DELETA CONVIDADO
-    public void deleteConvidado(String id){
-        SQLiteDatabase db=this.getWritableDatabase();
-        db.delete(NOME_TABELA,CODIGO+"=?",new String[]{id});
-        db.close();
     }
 
     //CONTAGEM DE CONVIDADOS
@@ -197,14 +198,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     //BUSCA POR NOME
-    public ConvidadoModel getConvidadoByNome(String nome){
+    public ConvidadoModel getConvidadoByName(String nome){
         SQLiteDatabase db=this.getReadableDatabase();
         ConvidadoModel convidadoModel = new ConvidadoModel();
 
         Cursor cursor = db.query(
                 NOME_TABELA,
                 new String[]{CODIGO,CPF,RG,NOME,STATUS, CONVIDADO_DE},
-                NOME+" = ?",
+                NOME+" LIKE ?",
                 new String[]{String.valueOf(nome)},
                 null,
                 null,
