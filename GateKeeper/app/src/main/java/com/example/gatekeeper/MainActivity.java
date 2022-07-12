@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
     String FILE_NAME = "convidados.json";
     String CHARSET = "UTF-8";
     Validations validations = new Validations();
-    String MESSAGE = "";
+    //String MESSAGE = "";
     MessageMaker messageMaker = new MessageMaker();
     String selected = "";
     List<ConvidadoModel> convidados;
@@ -221,15 +221,13 @@ public class MainActivity extends AppCompatActivity {
         if(result.getContents() != null){
             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
             builder.setTitle("Result");
-            ConvidadoModel convidadoModel = searchByScan(result.getContents().toString());
+            ConvidadoModel convidadoModel = searchByScan(result.getContents());
 
             //verifica se o convidado existe/ja entrou
             if(validations.convidadoIsValid(convidadoModel).getExists() && !validations.convidadoIsValid(convidadoModel).getIsInside()){
-                //atualiza o status
-                updateStatus(convidadoModel);
+                ShowConfirmDataDialog(convidadoModel);
             }
 
-            builder.setMessage(MESSAGE);
             builder.setPositiveButton("ok", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
