@@ -178,7 +178,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         ConvidadoModel convidadoModel = new ConvidadoModel();
         Cursor cursor = db.query(
                 NOME_TABELA,
-                new String[]{CODIGO,NOME, CPF,RG,STATUS, CONVIDADO_DE},
+                new String[]{CODIGO,NOME, RG,CPF,STATUS, CONVIDADO_DE},
                 RG+" = ?",
                 new String[]{String.valueOf(rg)},
                 null,
@@ -189,7 +189,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         if(cursor.getCount() > 0){
-            convidadoModel = new ConvidadoModel(cursor.getString(0),cursor.getString(1),cursor.getString(2),cursor.getString(3), cursor.getString(4),cursor.getString(5));
+            convidadoModel = new ConvidadoModel(cursor);
         }
 
         db.close();
@@ -204,7 +204,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         Cursor cursor = db.query(
                 NOME_TABELA,
-                new String[]{CODIGO,CPF,RG,NOME,STATUS, CONVIDADO_DE},
+                new String[]{CODIGO,NOME,RG,CPF,STATUS, CONVIDADO_DE},
                 NOME+" LIKE ?",
                 new String[]{String.valueOf(nome)},
                 null,

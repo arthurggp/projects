@@ -344,7 +344,7 @@ public class MainActivity extends AppCompatActivity {
                     alertDialog.dismiss();
 
                     //mostra mensagem
-                    messageMaker.MessageMaker(view,"Entrada Confirmada!", validationStructure.getMessage());;
+                    messageMaker.MessageMaker(view,"Entrada Confirmada!", validationStructure.getMessage());
 
                 }
             });

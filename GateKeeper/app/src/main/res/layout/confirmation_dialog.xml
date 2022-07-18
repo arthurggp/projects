@@ -20,38 +20,55 @@
             android:gravity="center"
             />
 
-        <!--CAMPO CPF-->
-        <EditText
-            android:layout_margin="5dp"
-            android:id="@+id/nome"
-            android:hint="NOME"
-            android:layout_width="match_parent"
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:inputType="none"/>
-
-        <!--CAMPO RG-->
-        <EditText
-            android:layout_margin="5dp"
-            android:id="@+id/cpf"
-            android:hint="CPF"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="none"/>
-
+            android:text="NOME:"
+            android:layout_marginLeft="10dp"/>
         <!--CAMPO NOME-->
         <EditText
             android:layout_margin="5dp"
-            android:id="@+id/rg"
-            android:hint="RG"
+            android:id="@+id/nome"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="none"/>
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="CPF:"
+            android:layout_marginLeft="10dp"/>
+        <!--CAMPO CPF-->
+        <EditText
+            android:layout_margin="5dp"
+            android:id="@+id/cpf"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="none"/>
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="RG:"
+            android:layout_marginLeft="10dp"/>
+        <!--CAMPO RG-->
+        <EditText
+            android:layout_margin="5dp"
+            android:id="@+id/rg"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="none"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="STATUS:"
+            android:layout_marginLeft="10dp"/>
         <!--CAMPO STATUS-->
         <EditText
             android:layout_margin="5dp"
             android:id="@+id/status"
-            android:hint="STATUS"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="none"/>
